@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pendaftaran Lomba Hari Santri 2026</title>
+  <title>Sistem Penilaian Lomba Hari Santri 2026</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,11 +12,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   
-  <!-- Babel Standalone untuk membaca JSX -->
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     @media print {
@@ -45,12 +42,13 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // =========================================================================
-    // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT (GAS) ANDA DI SINI
-    // =========================================================================
+    // ⚠️ GANTI DENGAN URL GOOGLE APPS SCRIPT ANDA
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzJ3PyQE4y5-LnsIlznitdAH4vfV-XbakCRpq7k6aJ5F8OCjKkOIknsTmarn5Gvdma8/exec";
 
-    // Data Cabang Lomba Hari Santri 2026
+    // 🔑 PIN KEAMANAN JURI (Ubah sesuai kebutuhan Anda)
+    const JURI_PIN = "1234";
+
+    // Data Cabang Lomba Beserta Kriteria Penilaian
     const LOMBA_DATA = [
       {
         kode: 'LMK',
@@ -58,8 +56,12 @@
         kategoriRaw: 'Kelas 1A, 1B, 2A, 2B',
         allowedClasses: ['1A', '1B', '2A', '2B'],
         isKelompok: false,
-        deskripsi: 'Lomba mewarnai seni kaligrafi tingkat dasar.',
-        icon: 'palette'
+        kriteria: [
+          { name: 'Gradasi Warna', maxScore: 100 },
+          { name: 'Kebersihan', maxScore: 100 },
+          { name: 'Kerapihan', maxScore: 100 }
+        ],
+        deskripsi: 'Lomba mewarnai seni kaligrafi tingkat dasar.'
       },
       {
         kode: 'LKG',
@@ -67,8 +69,12 @@
         kategoriRaw: 'Kelas 3A - 6B',
         allowedClasses: ['3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: false,
-        deskripsi: 'Menulis indah mushaf/kaligrafi Arab tingkat lanjutan.',
-        icon: 'pen-tool'
+        kriteria: [
+          { name: 'Kebenaran Kaidah', maxScore: 100 },
+          { name: 'Keindahan Khat', maxScore: 100 },
+          { name: 'Kerapihan & Kebersihan', maxScore: 100 }
+        ],
+        deskripsi: 'Menulis indah mushaf/kaligrafi Arab tingkat lanjutan.'
       },
       {
         kode: 'LHQ',
@@ -76,8 +82,13 @@
         kategoriRaw: 'Kelas 1A - 6B',
         allowedClasses: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: false,
-        deskripsi: 'Uji hafalan Al-Qur\'an sesuai tingkat kelas.',
-        icon: 'book-open'
+        kriteria: [
+          { name: 'Tahfizh (Kelancaran)', maxScore: 100 },
+          { name: 'Tajwid', maxScore: 100 },
+          { name: 'Irama', maxScore: 100 },
+          { name: 'Adab', maxScore: 100 }
+        ],
+        deskripsi: 'Uji hafalan Al-Qur\'an sesuai tingkat kelas.'
       },
       {
         kode: 'LAZ',
@@ -85,8 +96,12 @@
         kategoriRaw: 'Kelas 1A - 6B',
         allowedClasses: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: false,
-        deskripsi: 'Melafalkan adzan dan iqomah dengan makhraj dan nada yang indah.',
-        icon: 'mic'
+        kriteria: [
+          { name: 'Tajwid & Mukhraj', maxScore: 100 },
+          { name: 'Irama & Penghayatan', maxScore: 100 },
+          { name: 'Gestur & Adab', maxScore: 100 }
+        ],
+        deskripsi: 'Melafalkan adzan dan iqomah dengan makhraj dan nada yang indah.'
       },
       {
         kode: 'LTQ',
@@ -94,8 +109,12 @@
         kategoriRaw: 'Kelas 3A - 6B',
         allowedClasses: ['3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: false,
-        deskripsi: 'Membaca Al-Qur\'an dengan lagu/naghom & tajwid.',
-        icon: 'award'
+        kriteria: [
+          { name: 'Tajwid', maxScore: 100 },
+          { name: 'Irama & Naghom', maxScore: 100 },
+          { name: 'Adab & Suara', maxScore: 100 }
+        ],
+        deskripsi: 'Membaca Al-Qur\'an dengan lagu/naghom & tajwid.'
       },
       {
         kode: 'LPD',
@@ -103,8 +122,14 @@
         kategoriRaw: 'Kelas 3A - 6B',
         allowedClasses: ['3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: false,
-        deskripsi: 'Lomba ceramah/pidato bahasa Indonesia bertema keislaman/santri.',
-        icon: 'megaphone'
+        kriteria: [
+          { name: 'Tema & Kesesuaian Isi', maxScore: 100 },
+          { name: 'Materi & Kedalaman', maxScore: 100 },
+          { name: 'Sistematika Penyampaian', maxScore: 100 },
+          { name: 'Penghayatan & Retorika', maxScore: 100 },
+          { name: 'Penggunaan Dalil', maxScore: 100 }
+        ],
+        deskripsi: 'Lomba ceramah/pidato bahasa Indonesia bertema keislaman.'
       },
       {
         kode: 'LSJ',
@@ -112,9 +137,14 @@
         kategoriRaw: 'Kelas 3A - 6B',
         allowedClasses: ['3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: true,
-        anggotaLabels: ['Imam (Ketua)', 'Makmum 1 (Anggota)', 'Makmum 2 (Anggota)'],
-        deskripsi: 'Praktik sholat berjama\'ah 3 orang (bacaan keras, gerakan, kekhusyu\'an).',
-        icon: 'users'
+        anggotaLabels: ['Imam (Ketua)', 'Makmum 1', 'Makmum 2'],
+        kriteria: [
+          { name: 'Fi\'liyah (Gerakan Sholat)', maxScore: 100 },
+          { name: 'Qouliyah (Bacaan Sholat)', maxScore: 100 },
+          { name: 'Kekompakkan Tim', maxScore: 100 },
+          { name: 'Pakaian & Kerapihan', maxScore: 100 }
+        ],
+        deskripsi: 'Praktik sholat berjama\'ah 3 orang (bacaan keras, gerakan, kekhusyu\'an).'
       },
       {
         kode: 'LCC',
@@ -123,23 +153,29 @@
         allowedClasses: ['3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
         isKelompok: true,
         anggotaLabels: ['Ketua Regu', 'Anggota 1', 'Anggota 2'],
-        deskripsi: 'Kompetisi pengetahuan agama & umum beregu (3 santri per tim).',
-        icon: 'brain'
+        kriteria: [
+          { name: 'Nilai Akhir Cerdas Cermat', maxScore: 500 }
+        ],
+        deskripsi: 'Kompetisi pengetahuan agama & umum beregu (3 santri per tim).'
       }
     ];
 
     const ALL_CLASSES = ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'];
 
     function App() {
-      const [activeTab, setActiveTab] = useState('register');
+      const [activeTab, setActiveTab] = useState('penilaian');
       const [pendaftarList, setPendaftarList] = useState([]);
-      const [isLoading, setIsLoading] = useState(false);
-      const [isSubmitting, setIsSubmitting] = useState(false);
+      const [penilaianList, setPenilaianList] = useState([]);
       const [selectedCard, setSelectedCard] = useState(null);
       const [searchQuery, setSearchQuery] = useState('');
       const [filterLomba, setFilterLomba] = useState('ALL');
-      const [apiStatus, setApiStatus] = useState({ type: '', msg: '' });
 
+      // State Autentikasi PIN Juri
+      const [isJuriAuthenticated, setIsJuriAuthenticated] = useState(false);
+      const [inputPin, setInputPin] = useState('');
+      const [pinError, setPinError] = useState('');
+
+      // State Form Pendaftaran
       const [formData, setFormData] = useState({
         kodeLomba: '',
         kelas: '',
@@ -148,62 +184,72 @@
         anggota3: ''
       });
 
+      // State Form Penilaian Juri
+      const [namaJuri, setNamaJuri] = useState('');
+      const [selectedLombaNilai, setSelectedLombaNilai] = useState('');
+      const [selectedPesertaId, setSelectedPesertaId] = useState('');
+      const [scores, setScores] = useState({});
+
       const selectedLomba = LOMBA_DATA.find(l => l.kode === formData.kodeLomba);
+      const selectedLombaObj = LOMBA_DATA.find(l => l.kode === selectedLombaNilai);
+      const selectedPesertaObj = pendaftarList.find(p => p.id === selectedPesertaId);
 
-      // Fetch data dari Google Sheets API
-      const fetchPendaftar = async () => {
-        if (!GAS_API_URL || GAS_API_URL.includes("YOUR_DEPLOYMENT_ID_HERE")) {
-          setApiStatus({
-            type: 'warning',
-            msg: 'URL Google Apps Script belum dikonfigurasi. Menggunakan mode Demo LocalStorage.'
-          });
-          const local = localStorage.getItem('santri_pendaftaran_2026');
-          if (local) setPendaftarList(JSON.parse(local));
-          return;
-        }
+      // Fetch Data & Check Auth Status
+      const loadAllData = () => {
+        const localPendaftar = localStorage.getItem('santri_pendaftaran_2026');
+        if (localPendaftar) setPendaftarList(JSON.parse(localPendaftar));
 
-        setIsLoading(true);
-        try {
-          const res = await fetch(GAS_API_URL);
-          const json = await res.json();
-          if (json.success) {
-            setPendaftarList(json.data || []);
-            localStorage.setItem('santri_pendaftaran_2026', JSON.stringify(json.data || []));
-          } else {
-            console.error("GAS Error:", json.error);
-          }
-        } catch (err) {
-          console.error("Gagal mengambil data dari Google Sheets:", err);
-          const local = localStorage.getItem('santri_pendaftaran_2026');
-          if (local) setPendaftarList(JSON.parse(local));
-        } finally {
-          setIsLoading(false);
+        const localPenilaian = localStorage.getItem('santri_penilaian_2026');
+        if (localPenilaian) setPenilaianList(JSON.parse(localPenilaian));
+
+        const authStatus = sessionStorage.getItem('juri_authenticated');
+        if (authStatus === 'true') {
+          setIsJuriAuthenticated(true);
         }
       };
 
       useEffect(() => {
-        fetchPendaftar();
+        loadAllData();
       }, []);
 
-      const handleChangeLomba = (e) => {
-        const kode = e.target.value;
-        const lomba = LOMBA_DATA.find(l => l.kode === kode);
-        
-        let newKelas = formData.kelas;
-        if (lomba && !lomba.allowedClasses.includes(formData.kelas)) {
-          newKelas = '';
+      // Verify PIN Handler
+      const handleVerifyPin = (e) => {
+        e.preventDefault();
+        if (inputPin === JURI_PIN) {
+          setIsJuriAuthenticated(true);
+          sessionStorage.setItem('juri_authenticated', 'true');
+          setPinError('');
+          setInputPin('');
+        } else {
+          setPinError('PIN salah! Silakan tanyakan PIN ke Panitia Utama.');
         }
-
-        setFormData({
-          ...formData,
-          kodeLomba: kode,
-          kelas: newKelas,
-          anggota2: '',
-          anggota3: ''
-        });
       };
 
-      const handleSubmit = async (e) => {
+      // Logout Juri Handler
+      const handleLogoutJuri = () => {
+        setIsJuriAuthenticated(false);
+        sessionStorage.removeItem('juri_authenticated');
+      };
+
+      // Reset skor saat memilih lomba di form penilaian
+      useEffect(() => {
+        if (selectedLombaObj) {
+          const initialScores = {};
+          selectedLombaObj.kriteria.forEach(k => {
+            initialScores[k.name] = 0;
+          });
+          setScores(initialScores);
+        } else {
+          setScores({});
+        }
+        setSelectedPesertaId('');
+      }, [selectedLombaNilai]);
+
+      // Calculate Total Score
+      const totalScore = Object.values(scores).reduce((a, b) => Number(a || 0) + Number(b || 0), 0);
+
+      // Handle Submit Pendaftaran
+      const handleSubmitPendaftaran = (e) => {
         e.preventDefault();
         if (!formData.kodeLomba || !formData.kelas || !formData.namaPeserta) {
           alert('Mohon lengkapi seluruh field utama!');
@@ -211,11 +257,13 @@
         }
 
         if (selectedLomba?.isKelompok && (!formData.anggota2 || !formData.anggota3)) {
-          alert('Mohon lengkapi nama seluruh 3 anggota tim/regu!');
+          alert('Mohon lengkapi nama seluruh 3 anggota tim!');
           return;
         }
 
-        const payload = {
+        const newItem = {
+          id: 'REG-' + Date.now().toString().slice(-6),
+          timestamp: new Date().toISOString(),
           kodeLomba: formData.kodeLomba,
           namaLomba: selectedLomba.nama,
           kelas: formData.kelas,
@@ -225,112 +273,101 @@
           anggota3: formData.anggota3 || '-'
         };
 
-        setIsSubmitting(true);
-
-        // Jika API URL diset
-        if (GAS_API_URL && !GAS_API_URL.includes("YOUR_DEPLOYMENT_ID_HERE")) {
-          try {
-            const response = await fetch(GAS_API_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: 'create', data: payload })
-            });
-            const result = await response.json();
-            if (result.success) {
-              alert('🎉 Pendaftaran Berhasil Disimpan ke Google Sheets!');
-              setFormData({ kodeLomba: '', kelas: '', namaPeserta: '', anggota2: '', anggota3: '' });
-              fetchPendaftar();
-              setActiveTab('data');
-            } else {
-              alert('Gagal menyimpan: ' + result.error);
-            }
-          } catch (err) {
-            alert('Terjadi kesalahan koneksi ke Google Sheets. Menyimpan secara lokal.');
-            saveLocal(payload);
-          } finally {
-            setIsSubmitting(false);
-          }
-        } else {
-          // Fallback Local Storage
-          saveLocal(payload);
-          setIsSubmitting(false);
-        }
-      };
-
-      const saveLocal = (payload) => {
-        const newItem = {
-          id: 'REG-' + Date.now().toString().slice(-6),
-          timestamp: new Date().toISOString(),
-          ...payload
-        };
         const updated = [newItem, ...pendaftarList];
         setPendaftarList(updated);
         localStorage.setItem('santri_pendaftaran_2026', JSON.stringify(updated));
-        alert('🎉 Pendaftaran Berhasil! (Tersimpan di Penyimpanan Lokal)');
+        alert('🎉 Pendaftaran Berhasil!');
         setFormData({ kodeLomba: '', kelas: '', namaPeserta: '', anggota2: '', anggota3: '' });
         setActiveTab('data');
       };
 
-      const handleDelete = async (id) => {
-        if (!confirm('Apakah Anda yakin ingin menghapus data pendaftaran ini?')) return;
-
-        if (GAS_API_URL && !GAS_API_URL.includes("YOUR_DEPLOYMENT_ID_HERE")) {
-          try {
-            setIsLoading(true);
-            await fetch(GAS_API_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: 'delete', id: id })
-            });
-            fetchPendaftar();
-          } catch (err) {
-            alert('Gagal menghapus dari cloud: ' + err.message);
-          } finally {
-            setIsLoading(false);
-          }
-        } else {
-          const updated = pendaftarList.filter(item => item.id !== id);
-          setPendaftarList(updated);
-          localStorage.setItem('santri_pendaftaran_2026', JSON.stringify(updated));
+      // Handle Submit Penilaian
+      const handleSubmitPenilaian = (e) => {
+        e.preventDefault();
+        if (!namaJuri || !selectedLombaNilai || !selectedPesertaId) {
+          alert('Mohon lengkapi nama juri, cabang lomba, dan pilih peserta!');
+          return;
         }
+
+        const newPenilaian = {
+          id: 'NIL-' + Date.now().toString().slice(-6),
+          timestamp: new Date().toISOString(),
+          idRegistrasi: selectedPesertaObj.id,
+          namaJuri: namaJuri,
+          kodeLomba: selectedLombaObj.kode,
+          namaLomba: selectedLombaObj.nama,
+          kelas: selectedPesertaObj.kelas,
+          namaPeserta: selectedPesertaObj.isKelompok 
+            ? `${selectedPesertaObj.namaPeserta} (Tim)` 
+            : selectedPesertaObj.namaPeserta,
+          scores: { ...scores },
+          totalScore: totalScore
+        };
+
+        const updated = [newPenilaian, ...penilaianList];
+        setPenilaianList(updated);
+        localStorage.setItem('santri_penilaian_2026', JSON.stringify(updated));
+        alert(`✅ Penilaian Berhasil Disimpan!\nTotal Nilai: ${totalScore}`);
+
+        // Reset
+        setSelectedPesertaId('');
+        const resetScores = {};
+        selectedLombaObj.kriteria.forEach(k => resetScores[k.name] = 0);
+        setScores(resetScores);
       };
 
-      const filteredList = pendaftarList.filter(item => {
-        const matchesLomba = filterLomba === 'ALL' || item.kodeLomba === filterLomba;
-        const matchesSearch = 
-          item.namaPeserta.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (item.anggota2 && item.anggota2.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (item.anggota3 && item.anggota3.toLowerCase().includes(searchQuery.toLowerCase()));
-        return matchesLomba && matchesSearch;
-      });
+      const handleDeletePenilaian = (id) => {
+        if (!confirm('Hapus data penilaian ini?')) return;
+        const updated = penilaianList.filter(n => n.id !== id);
+        setPenilaianList(updated);
+        localStorage.setItem('santri_penilaian_2026', JSON.stringify(updated));
+      };
+
+      // Generator Rekap Per-Lomba (Rangking)
+      const getRankingList = () => {
+        if (filterLomba === 'ALL') return [];
+        return penilaianList
+          .filter(p => p.kodeLomba === filterLomba)
+          .sort((a, b) => b.totalScore - a.totalScore);
+      };
 
       return (
         <div className="min-h-screen flex flex-col">
           {/* Header */}
           <header className="bg-emerald-800 text-white shadow-lg border-b-4 border-amber-400 no-print">
-            <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="max-w-6xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3 text-center md:text-left">
-                <div className="bg-emerald-700 p-3 rounded-2xl border border-emerald-600 shadow-inner">
+                <div className="bg-emerald-700 p-2.5 rounded-2xl border border-emerald-600 shadow-inner">
                   <span className="text-3xl">🕌</span>
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-amber-300">
+                  <h1 className="text-2xl font-black tracking-tight text-amber-300">
                     Lomba Hari Santri 2026
                   </h1>
-                  <p className="text-emerald-100 text-sm font-medium">
-                    Sistem Pendaftaran Resmi & Database Peserta
+                  <p className="text-emerald-100 text-xs font-medium">
+                    Sistem Pendaftaran & Halaman Penilaian Dewan Hakim
                   </p>
                 </div>
               </div>
 
-              {/* Navigation Tabs */}
-              <nav className="flex bg-emerald-900/60 p-1.5 rounded-xl border border-emerald-700/50">
+              {/* Nav Navigation */}
+              <nav className="flex bg-emerald-900/60 p-1.5 rounded-xl border border-emerald-700/50 flex-wrap justify-center">
+                <button
+                  onClick={() => setActiveTab('penilaian')}
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                    activeTab === 'penilaian'
+                      ? 'bg-amber-400 text-emerald-950 shadow'
+                      : 'text-emerald-100 hover:text-white hover:bg-emerald-800/50'
+                  }`}
+                >
+                  <span>⚖️ Penilaian Juri</span>
+                  {!isJuriAuthenticated && <span className="text-[10px] bg-red-500/80 text-white px-1.5 py-0.2 rounded">Terkunci</span>}
+                </button>
                 <button
                   onClick={() => setActiveTab('register')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
                     activeTab === 'register'
-                      ? 'bg-amber-400 text-emerald-950 font-bold shadow'
+                      ? 'bg-amber-400 text-emerald-950 shadow'
                       : 'text-emerald-100 hover:text-white hover:bg-emerald-800/50'
                   }`}
                 >
@@ -338,24 +375,19 @@
                 </button>
                 <button
                   onClick={() => setActiveTab('data')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
                     activeTab === 'data'
-                      ? 'bg-amber-400 text-emerald-950 font-bold shadow'
+                      ? 'bg-amber-400 text-emerald-950 shadow'
                       : 'text-emerald-100 hover:text-white hover:bg-emerald-800/50'
                   }`}
                 >
-                  📋 Data Peserta
-                  {pendaftarList.length > 0 && (
-                    <span className="ml-2 bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                      {pendaftarList.length}
-                    </span>
-                  )}
+                  📋 Data Peserta ({pendaftarList.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('katalog')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
                     activeTab === 'katalog'
-                      ? 'bg-amber-400 text-emerald-950 font-bold shadow'
+                      ? 'bg-amber-400 text-emerald-950 shadow'
                       : 'text-emerald-100 hover:text-white hover:bg-emerald-800/50'
                   }`}
                 >
@@ -365,21 +397,272 @@
             </div>
           </header>
 
-          {/* Alert Status Banner */}
-          {apiStatus.msg && (
-            <div className="bg-amber-100 border-b border-amber-300 text-amber-900 px-4 py-2 text-xs text-center font-medium no-print">
-              ⚠️ {apiStatus.msg}
-            </div>
-          )}
-
-          {/* Main Content Container */}
+          {/* Content Body */}
           <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
 
-            {/* TAB 1: FORM PENDAFTARAN */}
+            {/* TAB: PENILAIAN JURI */}
+            {activeTab === 'penilaian' && (
+              <div>
+                {!isJuriAuthenticated ? (
+                  /* MODAL PIN LOCK SCREEN */
+                  <div className="max-w-md mx-auto my-12 bg-white rounded-2xl shadow-xl border border-emerald-100 overflow-hidden p-8 text-center space-y-6">
+                    <div className="w-16 h-16 bg-amber-100 border border-amber-300 rounded-full flex items-center justify-center mx-auto text-3xl">
+                      🔒
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-800">Akses Terkunci Khusus Juri</h3>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Silakan masukkan Kode PIN Keamanan untuk membuka form penilaian Dewan Hakim.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleVerifyPin} className="space-y-4">
+                      <div>
+                        <input
+                          type="password"
+                          maxLength="6"
+                          placeholder="Masukkan PIN Juri..."
+                          value={inputPin}
+                          onChange={(e) => setInputPin(e.target.value)}
+                          className="w-full text-center tracking-widest text-2xl font-mono py-3 px-4 border rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                          required
+                          autoFocus
+                        />
+                        {pinError && (
+                          <p className="text-red-500 text-xs mt-2 font-semibold">{pinError}</p>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow transition text-sm"
+                      >
+                        🔓 Buka Halaman Penilaian
+                      </button>
+                    </form>
+                    <p className="text-[11px] text-slate-400">Default PIN: <strong>1234</strong> (Dapat diubah di file kode)</p>
+                  </div>
+                ) : (
+                  /* DASHBOARD PENILAIAN AKTIF (SUDAH AUTENTIKASI) */
+                  <div className="space-y-6">
+                    {/* Top Bar Logout Juri */}
+                    <div className="bg-emerald-100/80 border border-emerald-200 p-3 rounded-xl flex justify-between items-center text-xs text-emerald-950 font-semibold">
+                      <span className="flex items-center gap-2">
+                        <span>🟢</span> Sesi Penilaian Dewan Hakim Aktif
+                      </span>
+                      <button
+                        onClick={handleLogoutJuri}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
+                      >
+                        🔒 Kunci Kembali
+                      </button>
+                    </div>
+
+                    <div className="grid lg:grid-cols-12 gap-8">
+                      {/* Form Input Nilai (Left Column) */}
+                      <div className="lg:col-span-5 space-y-6">
+                        <div className="bg-white rounded-2xl shadow-md border border-emerald-100 overflow-hidden">
+                          <div className="bg-gradient-to-r from-emerald-800 to-teal-800 p-5 text-white">
+                            <h2 className="text-lg font-bold flex items-center gap-2">
+                              <span>⚖️</span> Form Penilaian Dewan Hakim
+                            </h2>
+                            <p className="text-emerald-100 text-xs mt-1">Masukkan skor berdasarkan kriteria cabang lomba.</p>
+                          </div>
+
+                          <form onSubmit={handleSubmitPenilaian} className="p-6 space-y-5">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Nama Juri / Dewan Hakim <span className="text-red-500">*</span></label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="Masukkan nama Anda (Juri)..."
+                                value={namaJuri}
+                                onChange={(e) => setNamaJuri(e.target.value)}
+                                className="w-full px-3.5 py-2.5 rounded-lg border text-sm font-medium focus:ring-2 focus:ring-emerald-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Pilih Cabang Lomba <span className="text-red-500">*</span></label>
+                              <select
+                                value={selectedLombaNilai}
+                                onChange={(e) => setSelectedLombaNilai(e.target.value)}
+                                required
+                                className="w-full px-3.5 py-2.5 rounded-lg border text-sm font-medium focus:ring-2 focus:ring-emerald-500 bg-white"
+                              >
+                                <option value="">-- Pilih Lomba --</option>
+                                {LOMBA_DATA.map(l => (
+                                  <option key={l.kode} value={l.kode}>[{l.kode}] {l.nama}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Select Peserta Filtered by Lomba */}
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">Pilih Peserta / Regu <span className="text-red-500">*</span></label>
+                              <select
+                                value={selectedPesertaId}
+                                onChange={(e) => setSelectedPesertaId(e.target.value)}
+                                required
+                                disabled={!selectedLombaNilai}
+                                className="w-full px-3.5 py-2.5 rounded-lg border text-sm font-medium focus:ring-2 focus:ring-emerald-500 bg-white disabled:bg-slate-100"
+                              >
+                                <option value="">
+                                  {!selectedLombaNilai ? '-- Pilih Lomba Terlebih Dahulu --' : '-- Pilih Peserta Tampil --'}
+                                </option>
+                                {pendaftarList
+                                  .filter(p => p.kodeLomba === selectedLombaNilai)
+                                  .map(p => (
+                                    <option key={p.id} value={p.id}>
+                                      [{p.id}] {p.namaPeserta} - Kelas {p.kelas} {p.isKelompok ? '(Tim)' : ''}
+                                    </option>
+                                  ))}
+                              </select>
+                            </div>
+
+                            {/* Input Kriteria Penilaian */}
+                            {selectedLombaObj && (
+                              <div className="space-y-4 pt-3 border-t">
+                                <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Kriteria Penilaian:</p>
+                                {selectedLombaObj.kriteria.map((krit) => (
+                                  <div key={krit.name} className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <label className="text-xs font-bold text-slate-700">{krit.name}</label>
+                                      <span className="text-[10px] text-slate-400 font-mono">Max: {krit.maxScore}</span>
+                                    </div>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max={krit.maxScore}
+                                      required
+                                      value={scores[krit.name] || 0}
+                                      onChange={(e) => setScores({
+                                        ...scores,
+                                        [krit.name]: Math.min(krit.maxScore, Math.max(0, Number(e.target.value)))
+                                      })}
+                                      className="w-full px-3 py-2 rounded border bg-white text-sm font-bold text-emerald-900 focus:ring-2 focus:ring-emerald-500"
+                                    />
+                                  </div>
+                                ))}
+
+                                <div className="bg-amber-100 border border-amber-300 p-3 rounded-xl flex justify-between items-center text-amber-950 font-bold">
+                                  <span className="text-xs uppercase">Total Skor Akhir:</span>
+                                  <span className="text-2xl font-black text-emerald-900">{totalScore}</span>
+                                </div>
+                              </div>
+                            )}
+
+                            <button
+                              type="submit"
+                              className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow transition"
+                            >
+                              💾 Simpan Penilaian
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+
+                      {/* Live Hasil & Rangking (Right Column) */}
+                      <div className="lg:col-span-7 space-y-6">
+                        {/* Rangking Card */}
+                        <div className="bg-white rounded-2xl shadow-md border border-emerald-100 p-6">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                            <div>
+                              <h3 className="text-base font-bold text-slate-800">🏆 Rekap Klasemen / Rangking Nilai</h3>
+                              <p className="text-slate-500 text-xs">Pilih cabang lomba untuk melihat urutan juara.</p>
+                            </div>
+
+                            <select
+                              value={filterLomba}
+                              onChange={(e) => setFilterLomba(e.target.value)}
+                              className="px-3 py-1.5 border rounded-lg text-xs font-bold bg-white text-emerald-900 border-emerald-300"
+                            >
+                              <option value="ALL">-- Filter Hasil per Lomba --</option>
+                              {LOMBA_DATA.map(l => (
+                                <option key={l.kode} value={l.kode}>[{l.kode}] {l.nama}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {filterLomba === 'ALL' ? (
+                            <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-xs">
+                              Silakan pilih cabang lomba pada dropdown di atas untuk menampilkan urutan nilai / calon pemenang.
+                            </div>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs">
+                                <thead className="bg-slate-100 text-slate-600 font-bold uppercase">
+                                  <tr>
+                                    <th className="px-3 py-2 text-center">Peringkat</th>
+                                    <th className="px-3 py-2">Peserta / Tim</th>
+                                    <th className="px-3 py-2">Kelas</th>
+                                    <th className="px-3 py-2">Juri</th>
+                                    <th className="px-3 py-2 text-right">Total Nilai</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {getRankingList().length === 0 ? (
+                                    <tr>
+                                      <td colSpan="5" className="px-4 py-8 text-center text-slate-400">Belum ada nilai yang dimasukkan untuk cabang lomba ini.</td>
+                                    </tr>
+                                  ) : (
+                                    getRankingList().map((item, idx) => (
+                                      <tr key={item.id} className={idx === 0 ? 'bg-amber-50/70 font-bold' : ''}>
+                                        <td className="px-3 py-2.5 text-center">
+                                          {idx === 0 && <span className="bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full font-black text-[10px]">🥇 Juara 1</span>}
+                                          {idx === 1 && <span className="bg-slate-300 text-slate-800 px-2 py-0.5 rounded-full font-black text-[10px]">🥈 Juara 2</span>}
+                                          {idx === 2 && <span className="bg-amber-700 text-white px-2 py-0.5 rounded-full font-black text-[10px]">🥉 Juara 3</span>}
+                                          {idx > 2 && <span className="text-slate-500 font-mono">#{idx + 1}</span>}
+                                        </td>
+                                        <td className="px-3 py-2.5 font-bold text-slate-800">{item.namaPeserta}</td>
+                                        <td className="px-3 py-2.5">Kelas {item.kelas}</td>
+                                        <td className="px-3 py-2.5 text-slate-500">{item.namaJuri}</td>
+                                        <td className="px-3 py-2.5 text-right font-mono font-black text-emerald-700 text-sm">{item.totalScore}</td>
+                                      </tr>
+                                    ))
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Riwayat Penilaian Terbaru */}
+                        <div className="bg-white rounded-2xl shadow-md border border-emerald-100 p-6">
+                          <h3 className="text-sm font-bold text-slate-800 mb-4">📑 Riwayat Seluruh Penilaian Juri</h3>
+                          <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                            {penilaianList.length === 0 ? (
+                              <p className="text-xs text-slate-400 text-center py-4">Belum ada riwayat penilaian.</p>
+                            ) : (
+                              penilaianList.map((p) => (
+                                <div key={p.id} className="p-3 bg-slate-50 rounded-xl border flex justify-between items-center text-xs">
+                                  <div>
+                                    <div className="font-bold text-slate-800">{p.namaPeserta} <span className="text-slate-400 font-normal">({p.namaLomba})</span></div>
+                                    <div className="text-[10px] text-slate-500">Juri: {p.namaJuri} | Reg: {p.idRegistrasi}</div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-mono font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">
+                                      Skor: {p.totalScore}
+                                    </span>
+                                    <button onClick={() => handleDeletePenilaian(p.id)} className="text-red-500 hover:text-red-700">🗑️</button>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: FORM PENDAFTARAN */}
             {activeTab === 'register' && (
               <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl border border-emerald-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-emerald-700 to-teal-800 px-6 py-5 text-white">
+                  <div className="bg-gradient-to-r from-emerald-800 to-teal-800 px-6 py-5 text-white">
                     <h2 className="text-xl font-bold flex items-center gap-2">
                       <span>📌</span> Formulir Pendaftaran Peserta
                     </h2>
@@ -388,297 +671,119 @@
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
-                    {/* Choose Lomba */}
+                  <form onSubmit={handleSubmitPendaftaran} className="p-6 md:p-8 space-y-6">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">
-                        Pilih Cabang Lomba <span className="text-red-500">*</span>
-                      </label>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Pilih Cabang Lomba <span className="text-red-500">*</span></label>
                       <select
                         value={formData.kodeLomba}
-                        onChange={handleChangeLomba}
+                        onChange={(e) => setFormData({ ...formData, kodeLomba: e.target.value, kelas: '' })}
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white font-medium text-slate-800 shadow-sm transition"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 font-medium text-slate-800"
                       >
                         <option value="">-- Pilih Mata Lomba --</option>
                         {LOMBA_DATA.map(lomba => (
                           <option key={lomba.kode} value={lomba.kode}>
-                            [{lomba.kode}] {lomba.nama} ({lomba.kategoriRaw}) {lomba.isKelompok ? '👥 Berkelompok' : '👤 Individu'}
+                            [{lomba.kode}] {lomba.nama} ({lomba.kategoriRaw}) {lomba.isKelompok ? '👥 Berkelompok' : '👤 Perorangan'}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    {/* Selected Lomba Badge Info */}
-                    {selectedLomba && (
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-xs text-emerald-900 space-y-1">
-                        <div className="font-bold text-emerald-800 text-sm flex items-center justify-between">
-                          <span>{selectedLomba.nama} ({selectedLomba.kode})</span>
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${selectedLomba.isKelompok ? 'bg-amber-200 text-amber-900' : 'bg-blue-200 text-blue-900'}`}>
-                            {selectedLomba.isKelompok ? 'Lomba Berkelompok (3 Orang)' : 'Lomba Perorangan / Individu'}
-                          </span>
-                        </div>
-                        <p>{selectedLomba.deskripsi}</p>
-                        <p className="font-semibold text-emerald-700">Kategori Kelas Diizinkan: {selectedLomba.kategoriRaw}</p>
-                      </div>
-                    )}
-
-                    {/* Choose Kelas */}
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">
-                        Kategori Kelas <span className="text-red-500">*</span>
-                      </label>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Kategori Kelas <span className="text-red-500">*</span></label>
                       <select
                         value={formData.kelas}
                         onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
                         required
                         disabled={!formData.kodeLomba}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white font-medium text-slate-800 disabled:bg-slate-100 disabled:cursor-not-allowed shadow-sm transition"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 font-medium disabled:bg-slate-100"
                       >
-                        <option value="">
-                          {!formData.kodeLomba ? '-- Pilih Lomba Terlebih Dahulu --' : '-- Pilih Kelas Peserta --'}
-                        </option>
-                        {selectedLomba
-                          ? selectedLomba.allowedClasses.map(k => (
-                              <option key={k} value={k}>Kelas {k}</option>
-                            ))
-                          : ALL_CLASSES.map(k => (
-                              <option key={k} value={k}>Kelas {k}</option>
-                            ))
-                        }
+                        <option value="">-- Pilih Kelas --</option>
+                        {selectedLomba ? selectedLomba.allowedClasses.map(k => (
+                          <option key={k} value={k}>Kelas {k}</option>
+                        )) : ALL_CLASSES.map(k => <option key={k} value={k}>Kelas {k}</option>)}
                       </select>
                     </div>
 
-                    {/* Nama Peserta / Tim */}
                     {!selectedLomba?.isKelompok ? (
                       <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Nama Lengkap Peserta <span className="text-red-500">*</span>
-                        </label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Nama Lengkap Peserta <span className="text-red-500">*</span></label>
                         <input
                           type="text"
                           required
                           placeholder="Masukkan nama lengkap santri..."
                           value={formData.namaPeserta}
                           onChange={(e) => setFormData({ ...formData, namaPeserta: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium text-slate-800 shadow-sm transition"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 font-medium"
                         />
                       </div>
                     ) : (
                       <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <div className="font-bold text-slate-700 text-sm flex items-center justify-between border-b pb-2 border-slate-200">
-                          <span>👥 Anggota Tim / Regu (Wajib 3 Peserta)</span>
-                        </div>
-
+                        <p className="font-bold text-slate-700 text-sm">👥 Anggota Tim / Regu (Wajib 3 Peserta)</p>
                         <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">
-                            1. {selectedLomba.anggotaLabels?.[0] || 'Ketua Tim / Anggota 1'} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Nama Lengkap Ketua / Imam..."
-                            value={formData.namaPeserta}
-                            onChange={(e) => setFormData({ ...formData, namaPeserta: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 text-sm"
-                          />
+                          <label className="block text-xs font-bold text-slate-600 mb-1">1. {selectedLomba.anggotaLabels?.[0]} <span className="text-red-500">*</span></label>
+                          <input type="text" required placeholder="Nama Ketua / Imam..." value={formData.namaPeserta} onChange={(e) => setFormData({ ...formData, namaPeserta: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border text-sm" />
                         </div>
-
                         <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">
-                            2. {selectedLomba.anggotaLabels?.[1] || 'Anggota 2'} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Nama Lengkap Makmum 1 / Anggota 2..."
-                            value={formData.anggota2}
-                            onChange={(e) => setFormData({ ...formData, anggota2: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 text-sm"
-                          />
+                          <label className="block text-xs font-bold text-slate-600 mb-1">2. {selectedLomba.anggotaLabels?.[1]} <span className="text-red-500">*</span></label>
+                          <input type="text" required placeholder="Nama Anggota 2..." value={formData.anggota2} onChange={(e) => setFormData({ ...formData, anggota2: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border text-sm" />
                         </div>
-
                         <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">
-                            3. {selectedLomba.anggotaLabels?.[2] || 'Anggota 3'} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Nama Lengkap Makmum 2 / Anggota 3..."
-                            value={formData.anggota3}
-                            onChange={(e) => setFormData({ ...formData, anggota3: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 bg-white font-medium text-slate-800 text-sm"
-                          />
+                          <label className="block text-xs font-bold text-slate-600 mb-1">3. {selectedLomba.anggotaLabels?.[2]} <span className="text-red-500">*</span></label>
+                          <input type="text" required placeholder="Nama Anggota 3..." value={formData.anggota3} onChange={(e) => setFormData({ ...formData, anggota3: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border text-sm" />
                         </div>
                       </div>
                     )}
 
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-600/30 transition-all duration-200 flex items-center justify-center gap-2 text-base disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span>Menyimpan Ke Spreadsheet...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Kirim Pendaftaran</span>
-                          <span>➔</span>
-                        </>
-                      )}
+                    <button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">
+                      Kirim Pendaftaran ➔
                     </button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: DATA PESERTA & REKAPITULASI */}
+            {/* TAB: REKAP DATA PESERTA */}
             {activeTab === 'data' && (
               <div className="space-y-6">
-                {/* Stats Header */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">Total Pendaftar</p>
-                    <p className="text-2xl font-black text-emerald-800">{pendaftarList.length}</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">Lomba Perorangan</p>
-                    <p className="text-2xl font-black text-blue-700">
-                      {pendaftarList.filter(i => !i.isKelompok).length}
-                    </p>
-                  </div>
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">Lomba Kelompok (Tim)</p>
-                    <p className="text-2xl font-black text-amber-700">
-                      {pendaftarList.filter(i => i.isKelompok).length}
-                    </p>
-                  </div>
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">Cabang Terfavorit</p>
-                    <p className="text-sm font-bold text-slate-800 truncate">
-                      {pendaftarList.length === 0 ? '-' : (() => {
-                        const counts = {};
-                        pendaftarList.forEach(i => counts[i.kodeLomba] = (counts[i.kodeLomba] || 0) + 1);
-                        const top = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, '');
-                        return LOMBA_DATA.find(l => l.kode === top)?.nama || '-';
-                      })()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Filter and Search Bar */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-emerald-100 flex flex-col md:flex-row gap-3 justify-between items-center">
-                  <div className="w-full md:w-auto flex-1 flex flex-col md:flex-row gap-3">
+                <div className="bg-white rounded-2xl shadow-md border overflow-hidden">
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800 text-base">📋 Data Seluruh Pendaftar</h3>
                     <input
                       type="text"
-                      placeholder="🔍 Cari nama peserta atau No. Reg..."
+                      placeholder="🔍 Cari nama peserta..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="px-4 py-2 border rounded-lg text-sm w-full md:w-64 focus:ring-2 focus:ring-emerald-500"
+                      className="px-3 py-1.5 border rounded-lg text-xs w-48"
                     />
-                    <select
-                      value={filterLomba}
-                      onChange={(e) => setFilterLomba(e.target.value)}
-                      className="px-4 py-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-emerald-500"
-                    >
-                      <option value="ALL">Semua Cabang Lomba</option>
-                      {LOMBA_DATA.map(l => (
-                        <option key={l.kode} value={l.kode}>[{l.kode}] {l.nama}</option>
-                      ))}
-                    </select>
                   </div>
-
-                  <button
-                    onClick={fetchPendaftar}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-2 border shadow-sm"
-                  >
-                    🔄 {isLoading ? 'Memuat Data...' : 'Refresh Data'}
-                  </button>
-                </div>
-
-                {/* Data Table */}
-                <div className="bg-white rounded-2xl shadow-md border border-emerald-100 overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-slate-700">
-                      <thead className="bg-emerald-800 text-white text-xs uppercase tracking-wider">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-emerald-800 text-white text-xs uppercase">
                         <tr>
                           <th className="px-4 py-3">No. Reg</th>
-                          <th className="px-4 py-3">Cabang Lomba</th>
+                          <th className="px-4 py-3">Lomba</th>
                           <th className="px-4 py-3">Kelas</th>
-                          <th className="px-4 py-3">Peserta / Anggota Regu</th>
+                          <th className="px-4 py-3">Nama Peserta / Tim</th>
                           <th className="px-4 py-3 text-center">Aksi</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {isLoading ? (
-                          <tr>
-                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
-                              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
-                              <p className="mt-2 text-xs font-semibold">Mengambil data pendaftar...</p>
+                        {pendaftarList.map((item) => (
+                          <tr key={item.id} className="hover:bg-slate-50 text-xs">
+                            <td className="px-4 py-3 font-mono font-bold text-emerald-900">{item.id}</td>
+                            <td className="px-4 py-3 font-semibold">{item.namaLomba}</td>
+                            <td className="px-4 py-3"><span className="bg-slate-100 px-2 py-0.5 rounded font-bold">Kelas {item.kelas}</span></td>
+                            <td className="px-4 py-3 font-bold">
+                              {!item.isKelompok ? item.namaPeserta : `1. ${item.namaPeserta} | 2. ${item.anggota2} | 3. ${item.anggota3}`}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button onClick={() => setSelectedCard(item)} className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">
+                                🖨️ Kartu
+                              </button>
                             </td>
                           </tr>
-                        ) : filteredList.length === 0 ? (
-                          <tr>
-                            <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
-                              Tidak ada data pendaftaran yang ditemukan.
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredList.map((item) => (
-                            <tr key={item.id} className="hover:bg-emerald-50/50 transition">
-                              <td className="px-4 py-3 font-mono font-bold text-emerald-900 text-xs">
-                                {item.id}
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className="font-semibold block">{item.namaLomba}</span>
-                                <span className="text-[10px] text-slate-400 font-mono">[{item.kodeLomba}]</span>
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className="bg-slate-100 px-2.5 py-1 rounded-md text-xs font-bold text-slate-700 border">
-                                  Kelas {item.kelas}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                {!item.isKelompok ? (
-                                  <span className="font-bold text-slate-800">{item.namaPeserta}</span>
-                                ) : (
-                                  <div className="space-y-0.5 text-xs">
-                                    <div className="font-bold text-emerald-800">1. {item.namaPeserta}</div>
-                                    <div className="text-slate-600">2. {item.anggota2}</div>
-                                    <div className="text-slate-600">3. {item.anggota3}</div>
-                                  </div>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-center">
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    onClick={() => setSelectedCard(item)}
-                                    className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xs rounded-lg transition"
-                                    title="Cetak Kartu Peserta"
-                                  >
-                                    🖨️ Kartu
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(item.id)}
-                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
-                                    title="Hapus Data"
-                                  >
-                                    🗑️
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))
-                        )}
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -686,31 +791,22 @@
               </div>
             )}
 
-            {/* TAB 3: KATALOG LOMBA */}
+            {/* TAB: KATALOG LOMBA & KRITERIA PENILAIAN */}
             {activeTab === 'katalog' && (
               <div className="grid md:grid-cols-2 gap-6">
-                {LOMBA_DATA.map((lomba) => (
-                  <div key={lomba.kode} className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 hover:shadow-md transition">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          KODE: {lomba.kode}
-                        </span>
-                        <h3 className="text-lg font-bold text-slate-800 mt-1">{lomba.nama}</h3>
-                      </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${lomba.isKelompok ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                        {lomba.isKelompok ? '👥 Kelompok (3 Orang)' : '👤 Perorangan'}
-                      </span>
+                {LOMBA_DATA.map((l) => (
+                  <div key={l.kode} className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-slate-800 text-base">[{l.kode}] {l.nama}</h3>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded font-bold">{l.kategoriRaw}</span>
                     </div>
-
-                    <p className="text-slate-600 text-sm mb-4">{lomba.deskripsi}</p>
-
+                    <p className="text-xs text-slate-600 mb-3">{l.deskripsi}</p>
                     <div className="border-t pt-3">
-                      <p className="text-xs font-semibold text-slate-500 mb-2">Kategori Kelas Diizinkan:</p>
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Kriteria Penilaian Juri:</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {lomba.allowedClasses.map(k => (
-                          <span key={k} className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-mono border">
-                            {k}
+                        {l.kriteria.map(k => (
+                          <span key={k.name} className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-1 rounded text-xs font-semibold">
+                            {k.name} (Max: {k.maxScore})
                           </span>
                         ))}
                       </div>
@@ -719,75 +815,44 @@
                 ))}
               </div>
             )}
+
           </main>
 
           {/* Modal Cetak Kartu Peserta */}
           {selectedCard && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                <div id="printable-area" className="border-2 border-emerald-600 p-6 rounded-xl bg-gradient-to-br from-emerald-50 via-white to-amber-50 relative overflow-hidden">
-                  <div className="text-center border-b border-emerald-200 pb-3 mb-4">
-                    <h3 className="text-lg font-black text-emerald-900 tracking-wide uppercase">KARTU PESERTA LOMBA</h3>
+              <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+                <div id="printable-area" className="border-2 border-emerald-600 p-6 rounded-xl bg-gradient-to-br from-emerald-50 to-amber-50">
+                  <div className="text-center border-b border-emerald-200 pb-2 mb-3">
+                    <h3 className="font-black text-emerald-900 text-base">KARTU PESERTA LOMBA</h3>
                     <p className="text-xs font-bold text-amber-600">HARI SANTRI 2026</p>
                   </div>
-
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between border-b border-slate-100 pb-1">
-                      <span className="text-slate-500 text-xs font-semibold">No. Registrasi</span>
-                      <span className="font-mono font-bold text-emerald-800">{selectedCard.id}</span>
+                  <div className="space-y-2 text-xs">
+                    <div><span className="text-slate-400">No Reg:</span> <strong className="font-mono text-emerald-900">{selectedCard.id}</strong></div>
+                    <div><span className="text-slate-400">Lomba:</span> <strong>{selectedCard.namaLomba}</strong></div>
+                    <div><span className="text-slate-400">Kelas:</span> <strong>Kelas {selectedCard.kelas}</strong></div>
+                    <div>
+                      <span className="text-slate-400 block mb-1">Peserta:</span>
+                      <div className="bg-white p-2 rounded border font-bold">
+                        {!selectedCard.isKelompok ? selectedCard.namaPeserta : (
+                          <ol className="list-decimal pl-4 space-y-0.5">
+                            <li>{selectedCard.namaPeserta}</li>
+                            <li>{selectedCard.anggota2}</li>
+                            <li>{selectedCard.anggota3}</li>
+                          </ol>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1">
-                      <span className="text-slate-500 text-xs font-semibold">Cabang Lomba</span>
-                      <span className="font-bold text-slate-800">{selectedCard.namaLomba}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1">
-                      <span className="text-slate-500 text-xs font-semibold">Kategori</span>
-                      <span className="font-bold text-slate-800">Kelas {selectedCard.kelas}</span>
-                    </div>
-
-                    <div className="pt-2">
-                      <span className="text-slate-500 text-xs font-semibold block mb-1">
-                        {selectedCard.isKelompok ? 'Anggota Tim / Regu:' : 'Nama Peserta:'}
-                      </span>
-                      {!selectedCard.isKelompok ? (
-                        <p className="text-base font-black text-slate-900 bg-emerald-100/50 p-2 rounded text-center border border-emerald-200">
-                          {selectedCard.namaPeserta}
-                        </p>
-                      ) : (
-                        <div className="bg-emerald-100/50 p-2.5 rounded border border-emerald-200 space-y-1 text-xs">
-                          <p className="font-bold text-emerald-950">1. {selectedCard.namaPeserta}</p>
-                          <p className="font-medium text-slate-800">2. {selectedCard.anggota2}</p>
-                          <p className="font-medium text-slate-800">3. {selectedCard.anggota3}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-3 border-t border-emerald-200 flex justify-between items-end text-[10px] text-slate-400">
-                    <span>Panitia Hari Santri 2026</span>
-                    <span>Tgl Cetak: {new Date().toLocaleDateString('id-ID')}</span>
                   </div>
                 </div>
-
-                <div className="flex gap-3 no-print">
-                  <button
-                    onClick={() => window.print()}
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow"
-                  >
-                    🖨️ Cetak / Save PDF
-                  </button>
-                  <button
-                    onClick={() => setSelectedCard(null)}
-                    className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-sm"
-                  >
-                    Tutup
-                  </button>
+                <div className="flex gap-2">
+                  <button onClick={() => window.print()} className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">🖨️ Cetak</button>
+                  <button onClick={() => setSelectedCard(null)} className="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">Tutup</button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Footer */}
           <footer className="bg-slate-800 text-slate-400 py-4 text-center text-xs border-t border-slate-700 no-print">
             © 2026 Panitia Lomba Hari Santri. Powered by GitHub Pages & Google Apps Script.
           </footer>
@@ -795,7 +860,6 @@
       );
     }
 
-    // Render React App
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
